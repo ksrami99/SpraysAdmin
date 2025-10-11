@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { loginService } from "../services/auth.service";
+import { adminLoginService, loginService } from "../services/auth.service";
 import { useNavigate } from "react-router-dom";
 
 import * as React from "react";
@@ -14,13 +14,19 @@ import Button from "@mui/joy/Button";
 import Link from "@mui/joy/Link";
 
 export default function Login(props) {
+  const [adminLogin, setAdminLogin] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const res = await loginService(email, password);
+    let res;
+    if (adminLogin) {
+      res = await adminLoginService(email, password);
+    } else {
+      res = await loginService(email, password);
+    }
     if (res.success) navigate("/admin");
   };
 
@@ -72,6 +78,16 @@ export default function Login(props) {
           <Button onClick={handleLogin} sx={{ mt: 1 }}>
             Log in
           </Button>
+          <div className="flex gap-3 items-center p-2 cursor-pointer">
+            <input
+              type="checkbox"
+              name="isAdmin"
+              id="isAdmin"
+              value={adminLogin}
+              onChange={() => setAdminLogin((state) => !state)}
+            />
+            <label htmlFor="isAdmin">ADMIN LOGIN</label>
+          </div>
         </Sheet>
       </CssVarsProvider>
     </main>
