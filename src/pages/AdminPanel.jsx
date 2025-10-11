@@ -4,12 +4,7 @@ import Drawer from "@mui/material/Drawer";
 import Button from "@mui/material/Button";
 import List from "@mui/material/List";
 import Divider from "@mui/material/Divider";
-import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
-import MailIcon from "@mui/icons-material/Mail";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
@@ -17,9 +12,16 @@ import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccessControl from "../components/AccessControl";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import Users from "./Users";
+import Categories from "./Categories";
+import Products from "./products";
+import Orders from "./Orders";
 
 export default function AdminPanel() {
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = useState(true);
+
+  const [isOpen, setIsOpen] = useState("Users");
 
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
@@ -32,28 +34,28 @@ export default function AdminPanel() {
       <AccessControl requiredPerms={["admin"]}>
         <List className="text-2xl font-semibold">
           <ListItemButton>
-            <Link to={"/admin/users"}>Users</Link>
+            <button onClick={() => setIsOpen("Users")}>Users</button>
           </ListItemButton>
         </List>
       </AccessControl>
       <AccessControl requiredPerms={["admin"]}>
         <List className="text-2xl font-semibold">
           <ListItemButton>
-            <List to="/admin/products">Products</List>
+            <button onClick={() => setIsOpen("Products")}>Products</button>
           </ListItemButton>
         </List>
       </AccessControl>
       <AccessControl requiredPerms={["admin"]}>
         <List className="text-2xl font-semibold">
           <ListItemButton>
-            <Link to={"/admin/categories"}>Categories</Link>
+            <button onClick={() => setIsOpen("Categories")}>Categories</button>
           </ListItemButton>
         </List>
       </AccessControl>
       <AccessControl requiredPerms={["admin"]}>
         <List className="text-2xl font-semibold">
           <ListItemButton>
-            <Link to={"admin/orders"}>Orders</Link>
+            <button onClick={() => setIsOpen("Orders")}>Orders</button>
           </ListItemButton>
         </List>
       </AccessControl>
@@ -81,7 +83,12 @@ export default function AdminPanel() {
           </Button>
         </Toolbar>
       </AppBar>
-      <div></div>
+      <div>
+        {isOpen === "Users" && <Users />}
+        {isOpen === "Categories" && <Categories />}
+        {isOpen === "Products" && <Products />}
+        {isOpen === "Orders" && <Orders />}
+      </div>
       <Drawer open={open} onClose={toggleDrawer(false)}>
         {DrawerList}
       </Drawer>
