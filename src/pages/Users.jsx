@@ -6,76 +6,74 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import AddIcon from "@mui/icons-material/Add";
 import IconButton from "@mui/material/IconButton";
 import Box from "@mui/material/Box";
-import { useState } from "react";
 import AccessControl from "../components/AccessControl";
 
-// Import Modal-related components for the edit/add functionality
+// Import Modal-related components for the edit functionality
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
+import { useState } from "react"; // Ensure useState is imported
 
 // ---------------------- API CALLS ----------------------
 
-const fetchCategories = async () => {
-  // NOTE: Changed "Token" to "token" for consistency, though using "Token" from old code
-  const { data } = await axios.get("http://localhost:3000/api/v1/categories", {
-    headers: { Authorization: localStorage.getItem("token") },
+const fetchUsers = async () => {
+  const { data } = await axios.get("http://localhost:3000/api/v1/user", {
+    headers: {
+      Authorization: `${localStorage.getItem("token")}`,
+    },
   });
   return data.data;
 };
 
-const deleteCategory = async (id) => {
-  const res = await axios.delete(
-    `http://localhost:3000/api/v1/categories/${id}`,
-    { headers: { Authorization: localStorage.getItem("token") } }
-  );
+const deleteUser = async (id) => {
+  const res = await axios.delete(`http://localhost:3000/api/v1/user/${id}`, {
+    headers: {
+      Authorization: `${localStorage.getItem("token")}`,
+    },
+  });
+
   return res;
 };
 
-const addCategory = async (newCategory) => {
-  const res = await axios.post(
-    `http://localhost:3000/api/v1/categories`,
-    newCategory,
-    { headers: { Authorization: localStorage.getItem("token") } }
-  );
-  return res;
-};
-
-// New API call for updating a category
-const updateCategory = async (category) => {
-  const { id, name, slug } = category;
+// New API call for updating a user
+const updateUser = async (user) => {
+  const { id, fullname, email } = user;
   const res = await axios.patch(
-    `http://localhost:3000/api/v1/categories/${id}`,
-    { name, slug }, // Data to update
-    { headers: { Authorization: localStorage.getItem("token") } }
+    `http://localhost:3000/api/v1/user/${id}`,
+    { fullname, email }, // Data to update
+    {
+      headers: {
+        Authorization: `${localStorage.getItem("token")}`,
+      },
+    }
   );
   return res;
 };
 
 // ---------------------- ACTION RENDERER ----------------------
 
+// Update the renderActions function to accept the handleEdit function
 const renderActions = (params, handleDelete, handleEdit) => {
-  const category = params.row;
+  const user = params.row;
 
   const handleDeleteClick = () => {
     if (
       window.confirm(
-        `Are you sure you want to delete category ${category.name}?`
+        `Are you sure you want to delete user ${user.id} - ${user.fullname}?`
       )
     ) {
-      handleDelete(category.id);
+      handleDelete(user.id);
     }
   };
 
   const handleEditClick = () => {
-    handleEdit(category);
+    // Pass the entire user object to the parent handler
+    handleEdit(user);
   };
 
   return (
@@ -96,15 +94,15 @@ const renderActions = (params, handleDelete, handleEdit) => {
 
 // ---------------------- COLUMNS DEFINITION ----------------------
 
+// Update createColumns to accept both handlers
 const createColumns = (handleDelete, handleEdit) => [
-  // Ensure the field matches the property name in your fetched data
   { field: "id", headerName: "ID", width: 200 },
-  { field: "name", headerName: "NAME", width: 450 },
-  { field: "slug", headerName: "SLUG", width: 450 },
+  { field: "fullname", headerName: "Name", width: 400 },
+  { field: "email", headerName: "Email", width: 400 },
   {
     field: "actions",
-    headerName: "ACTIONS",
-    width: 350,
+    headerName: "Actions",
+    width: 400,
     sortable: false,
     filterable: false,
     renderCell: (params) => renderActions(params, handleDelete, handleEdit),
@@ -113,23 +111,17 @@ const createColumns = (handleDelete, handleEdit) => [
 
 const paginationModel = { page: 0, pageSize: 5 };
 
-// ---------------------- EDIT/ADD MODAL COMPONENT ----------------------
+// ---------------------- EDIT MODAL COMPONENT (Simple Example) ----------------------
 
-function CategoryModal({
-  open,
-  initialData,
-  onClose,
-  onSave,
-  isSaving,
-  isAdding,
-}) {
+function EditUserModal({ open, user, onClose, onSave, isSaving }) {
   const [formData, setFormData] = useState(
-    initialData || { name: "", slug: "" }
+    user || { id: "", fullname: "", email: "" }
   );
 
+  // Update form data when the 'user' prop changes (e.g., when a new user is selected for edit)
   React.useEffect(() => {
-    setFormData(initialData || { name: "", slug: "" });
-  }, [initialData, open]);
+    setFormData(user || { id: "", fullname: "", email: "" });
+  }, [user]);
 
   const handleChange = (e) => {
     setFormData({
@@ -139,42 +131,35 @@ function CategoryModal({
   };
 
   const handleSave = () => {
-    // Basic validation
-    if (!formData.name || !formData.slug) {
-      toast.error("Name and Slug are required.");
-      return;
-    }
     onSave(formData);
   };
 
-  const title = isAdding
-    ? "Add New Category"
-    : `Edit Category: ${initialData?.name}`;
+  if (!user) return null;
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>{title}</DialogTitle>
+      <DialogTitle>Edit User: {user.fullname}</DialogTitle>
       <DialogContent>
         <TextField
           autoFocus
           margin="dense"
-          name="name"
-          label="Category Name"
+          name="fullname"
+          label="Full Name"
           type="text"
           fullWidth
           variant="outlined"
-          value={formData.name || ""}
+          value={formData.fullname}
           onChange={handleChange}
           sx={{ mt: 1 }}
         />
         <TextField
           margin="dense"
-          name="slug"
-          label="Category Slug"
-          type="text"
+          name="email"
+          label="Email Address"
+          type="email"
           fullWidth
           variant="outlined"
-          value={formData.slug || ""}
+          value={formData.email}
           onChange={handleChange}
           sx={{ mt: 2 }}
         />
@@ -191,106 +176,75 @@ function CategoryModal({
   );
 }
 
-// ---------------------- MAIN CATEGORIES COMPONENT ----------------------
+// ---------------------- MAIN USERS COMPONENT ----------------------
 
 export default function Categories() {
   const queryClient = useQueryClient();
 
-  // State to manage the Modal
+  // State to manage the Edit Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalInitialData, setModalInitialData] = useState(null);
-  const [isAdding, setIsAdding] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
 
-  // --- QUERY: Fetch Categories ---
+  // --- QUERY: Fetch Users ---
   const { data, isLoading, error } = useQuery({
-    queryKey: ["categories"],
-    queryFn: fetchCategories,
+    queryKey: ["users"],
+    queryFn: fetchUsers,
   });
 
-  // --- MUTATION: Delete Category ---
+  // --- MUTATION: Delete User ---
   const deleteMutation = useMutation({
-    mutationFn: deleteCategory,
+    mutationFn: deleteUser,
     onSuccess: (res) => {
       if (res.status === 200 || res.status === 204) {
-        toast.success("✅ Category deleted successfully!");
-        queryClient.invalidateQueries({ queryKey: ["categories"] });
+        toast.success("✅ User deleted successfully!");
+        queryClient.invalidateQueries({ queryKey: ["users"] });
       } else {
-        toast.error("❌ Failed to delete category");
+        toast.error("❌ Failed to delete user");
       }
     },
     onError: (err) => {
       const errorMessage = err.response?.data?.message || err.message;
-      toast.error(`❌ Error deleting category: ${errorMessage}`);
+      toast.error(`❌ Error: ${errorMessage}`);
     },
   });
 
-  // --- MUTATION: Update Category ---
+  // --- MUTATION: Update User ---
   const updateMutation = useMutation({
-    mutationFn: updateCategory,
+    mutationFn: updateUser,
     onSuccess: (res) => {
       if (res.status === 200) {
-        toast.success("✅ Category updated successfully!");
-        queryClient.invalidateQueries({ queryKey: ["categories"] });
+        toast.success("✅ User updated successfully!");
+        queryClient.invalidateQueries({ queryKey: ["users"] });
         setIsModalOpen(false); // Close modal on success
       } else {
-        toast.error("❌ Failed to update category");
+        toast.error("❌ Failed to update user");
       }
     },
     onError: (err) => {
       const errorMessage = err.response?.data?.message || err.message;
-      toast.error(`❌ Error updating category: ${errorMessage}`);
+      toast.error(`❌ Error updating user: ${errorMessage}`);
     },
   });
 
-  // --- MUTATION: Add Category ---
-  const addMutation = useMutation({
-    mutationFn: addCategory,
-    onSuccess: (res) => {
-      if (res.status === 200 || res.status === 201) {
-        toast.success("✅ Category added successfully!");
-        queryClient.invalidateQueries({ queryKey: ["categories"] });
-        setIsModalOpen(false); // Close modal on success
-      } else {
-        toast.error("❌ Failed to add category");
-      }
-    },
-    onError: (err) => {
-      const errorMessage = err.response?.data?.message || err.message;
-      toast.error(`❌ Error adding category: ${errorMessage}`);
-    },
-  });
-
-  // --- HANDLERS for CRUD Operations ---
-
-  const handleEdit = (category) => {
-    setModalInitialData(category);
-    setIsAdding(false);
-    setIsModalOpen(true);
-  };
-
-  const handleAddClick = () => {
-    setModalInitialData({ name: "", slug: "" }); // Empty data for adding
-    setIsAdding(true);
+  // --- HANDLERS for Edit ---
+  const handleEdit = (user) => {
+    setEditingUser(user);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setModalInitialData(null);
-    setIsAdding(false);
+    setEditingUser(null);
   };
 
-  const handleSave = (categoryData) => {
-    if (isAdding) {
-      addMutation.mutate(categoryData);
-    } else {
-      updateMutation.mutate(categoryData);
-    }
+  const handleSaveEdit = (userData) => {
+    // Trigger the update mutation with the form data
+    updateMutation.mutate(userData);
   };
 
   // ---------------------- RENDERING ----------------------
 
-  // Pass mutation functions to createColumns
+  // Pass both mutation functions to createColumns
   const columns = createColumns(deleteMutation.mutate, handleEdit);
 
   if (isLoading)
@@ -303,7 +257,7 @@ export default function Categories() {
   if (error) {
     return (
       <div className="flex justify-center items-center h-[70vh]">
-        Error fetching categories: {error.message}. Please check token/login.
+        Error fetching users: {error.message}. Please check token/login.
       </div>
     );
   }
@@ -312,41 +266,25 @@ export default function Categories() {
 
   return (
     <>
-      <Box className="mx-10 my-5">
-        <Box className="flex justify-between items-center mb-5">
-          <Typography variant="h4" component="h1">
-            Categories Management
-          </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<AddIcon />}
-            onClick={handleAddClick}
-          >
-            Add New Category
-          </Button>
-        </Box>
-        <Paper>
-          <div style={{ height: 400, width: "100%" }}>
-            <DataGrid
-              rows={rows}
-              columns={columns}
-              initialState={{ pagination: { paginationModel } }}
-              pageSizeOptions={[5, 10]}
-              sx={{ border: 0, boxShadow: 1 }}
-            />
-          </div>
-        </Paper>
-      </Box>
+      <Paper className="mx-10 my-5">
+        <div style={{ height: 400, width: "100%" }}>
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            initialState={{ pagination: { paginationModel } }}
+            pageSizeOptions={[5, 10]}
+            sx={{ border: 0, boxShadow: 1 }}
+          />
+        </div>
+      </Paper>
 
-      {/* The Edit/Add Modal Component */}
-      <CategoryModal
+      {/* The Edit Modal Component */}
+      <EditUserModal
         open={isModalOpen}
-        initialData={modalInitialData}
+        user={editingUser}
         onClose={handleCloseModal}
-        onSave={handleSave}
-        isSaving={updateMutation.isPending || addMutation.isPending}
-        isAdding={isAdding}
+        onSave={handleSaveEdit}
+        isSaving={updateMutation.isPending}
       />
     </>
   );
