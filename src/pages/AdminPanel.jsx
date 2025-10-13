@@ -15,7 +15,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Users from "./Users";
 import Categories from "./Categories";
-import Products from "./products";
+import Products from "./Products";
 import Orders from "./Orders";
 import RBAC from "./RBAC";
 
