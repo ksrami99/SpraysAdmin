@@ -5,7 +5,7 @@ export default function ProtectedRoute({ requiredPerms, children }) {
   const { hasPermission, permissions } = useAuthStore();  
   
   if (!hasPermission(requiredPerms)) {
-    return <Navigate to="/unauthorized" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return children;

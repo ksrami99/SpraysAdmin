@@ -20,7 +20,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/unauthorized" element={<h2>Unauthorized</h2>} />
+        {/* <Route path="/unauthorized" element={<h2>Unauthorized</h2>} /> */}
       </Routes>
     </BrowserRouter>
   );

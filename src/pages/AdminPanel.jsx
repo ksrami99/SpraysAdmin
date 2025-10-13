@@ -11,15 +11,20 @@ import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccessControl from "../components/AccessControl";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Users from "./Users";
 import Categories from "./Categories";
 import Products from "./Products";
 import Orders from "./Orders";
 import RBAC from "./RBAC";
+import { useStore } from "zustand";
+import { useAuthStore } from "../Store/auth.store";
 
 export default function AdminPanel() {
+  const { logout } = useAuthStore();
+
+  const navigate = useNavigate();
   const [open, setOpen] = useState(true);
 
   const [isOpen, setIsOpen] = useState("Users");
@@ -27,6 +32,10 @@ export default function AdminPanel() {
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
   };
+
+  useEffect(() => {
+    localStorage.getItem("token") || navigate("/");
+  }, []);
 
   const DrawerList = (
     <Box sx={{ width: 300 }} role="presentation" onClick={toggleDrawer(false)}>
@@ -86,9 +95,13 @@ export default function AdminPanel() {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             ADMIN PANEL
           </Typography>
-          <Button color="inherit">
-            <Link to="/">Login</Link>
-          </Button>
+          {localStorage.getItem("token") ? (
+            <Button onClick={logout} color="inherit">
+              <Link to={"/"}>Logout</Link>
+            </Button>
+          ) : (
+            null
+          )}
         </Toolbar>
       </AppBar>
       <div>
@@ -103,19 +116,4 @@ export default function AdminPanel() {
       </Drawer>
     </Box>
   );
-}
-
-{
-  /* <TemporaryDrawer /> */
-}
-{
-  /* <h2>Admin Panel</h2>
-
-      <AccessControl requiredPerms={["create-product"]}>
-        <button>Create Product</button>
-      </AccessControl>
-
-      <AccessControl requiredPerms={["delete-product"]}>
-        <button>Delete Product</button>
-      </AccessControl> */
 }
