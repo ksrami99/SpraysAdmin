@@ -17,6 +17,7 @@ import Users from "./Users";
 import Categories from "./Categories";
 import Products from "./products";
 import Orders from "./Orders";
+import RBAC from "./RBAC";
 
 export default function AdminPanel() {
   const [open, setOpen] = useState(true);
@@ -59,6 +60,13 @@ export default function AdminPanel() {
           </ListItemButton>
         </List>
       </AccessControl>
+      <AccessControl requiredPerms={["admin"]}>
+        <List className="text-2xl font-semibold">
+          <ListItemButton>
+            <button onClick={() => setIsOpen("RBAC")}>Access Control</button>
+          </ListItemButton>
+        </List>
+      </AccessControl>
     </Box>
   );
 
@@ -88,6 +96,7 @@ export default function AdminPanel() {
         {isOpen === "Categories" && <Categories />}
         {isOpen === "Products" && <Products />}
         {isOpen === "Orders" && <Orders />}
+        {isOpen === "RBAC" && <RBAC />}
       </div>
       <Drawer open={open} onClose={toggleDrawer(false)}>
         {DrawerList}
