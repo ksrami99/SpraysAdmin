@@ -182,13 +182,10 @@ const RBACMatrix = () => {
             <select
               value={selectedUser}
               onChange={(e) => {
-                console.log(e.target.value);
-
                 setSelectedUser(e.target.value);
               }}
               className="border p-2 rounded w-full"
             >
-              {console.log(matrix, "====== ")}
               <option value="">-- Select a user --</option>
               {usersQuery.data?.data?.map((user) => (
                 <option key={user.id} value={user.id}>
