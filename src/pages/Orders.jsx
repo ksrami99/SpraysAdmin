@@ -147,7 +147,7 @@ const createColumns = (handleStatusChange, isMutationPending, toggleModal) => [
     width: 300,
     getActions: (params) => [
       <div>
-        <AccessControl requiredPerms={["admin", "update-product-management"]}>
+        <AccessControl requiredPerms={["admin", "update-order-management"]}>
           <Select
             value={
               params.row.status.charAt(0).toUpperCase() +
