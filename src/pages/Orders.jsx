@@ -106,6 +106,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
+import AccessControl from "../components/AccessControl";
 
 // ---------------------- COLUMNS DEFINITION ----------------------
 
@@ -145,20 +146,25 @@ const createColumns = (handleStatusChange, isMutationPending, toggleModal) => [
     headerName: "Actions",
     width: 300,
     getActions: (params) => [
-      <Select
-        value={
-          params.row.status.charAt(0).toUpperCase() + params.row.status.slice(1)
-        }
-        onChange={(e) => handleStatusChange(params.row.id, e.target.value)}
-        variant="standard"
-        size="small"
-        disabled={isMutationPending}
-        sx={{ minWidth: 100, fontSize: "0.875rem" }}
-      >
-        <MenuItem value={"Pending"}>Pending</MenuItem>
-        <MenuItem value={"Delivered"}>Delivered</MenuItem>
-        <MenuItem value={"Canceled"}>Canceled</MenuItem>
-      </Select>,
+      <div>
+        <AccessControl requiredPerms={["admin", "update-product-management"]}>
+          <Select
+            value={
+              params.row.status.charAt(0).toUpperCase() +
+              params.row.status.slice(1)
+            }
+            onChange={(e) => handleStatusChange(params.row.id, e.target.value)}
+            variant="standard"
+            size="small"
+            disabled={isMutationPending}
+            sx={{ minWidth: 100, fontSize: "0.875rem" }}
+          >
+            <MenuItem value={"Pending"}>Pending</MenuItem>
+            <MenuItem value={"Delivered"}>Delivered</MenuItem>
+            <MenuItem value={"Canceled"}>Canceled</MenuItem>
+          </Select>
+        </AccessControl>
+      </div>,
     ],
   },
 ];

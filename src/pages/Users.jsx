@@ -78,12 +78,12 @@ const renderActions = (params, handleDelete, handleEdit) => {
 
   return (
     <Box>
-      <AccessControl requiredPerms={["admin"]}>
+      <AccessControl requiredPerms={["admin", "update-user-management"]}>
         <IconButton onClick={handleEditClick} color="primary" size="small">
           <EditIcon fontSize="inherit" />
         </IconButton>
       </AccessControl>
-      <AccessControl requiredPerms={["admin"]}>
+      <AccessControl requiredPerms={["admin", "delete-user-management"]}>
         <IconButton onClick={handleDeleteClick} color="error" size="small">
           <DeleteIcon fontSize="inherit" />
         </IconButton>

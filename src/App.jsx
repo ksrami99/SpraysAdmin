@@ -15,9 +15,17 @@ function App() {
         <Route
           path="/admin"
           element={
-            <ProtectedRoute requiredPerms={["admin"]}>
+            // <ProtectedRoute
+            //   requiredPerms={[
+            //     "admin",
+            //     "read-user-management",
+            //     "write-user-management",
+            //     "update-user-management",
+            //     "delete-user-management",
+            //   ]}
+            // >
               <AdminPanel />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         {/* <Route path="/unauthorized" element={<h2>Unauthorized</h2>} /> */}

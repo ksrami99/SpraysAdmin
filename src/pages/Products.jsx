@@ -77,7 +77,7 @@ const renderActions = (
 
   return (
     <Box>
-      <AccessControl requiredPerms={["admin"]}>
+      <AccessControl requiredPerms={["admin", "update-product-management"]}>
         <IconButton
           onClick={() => handleOpenEditModal(product)}
           color="primary"
@@ -87,7 +87,7 @@ const renderActions = (
           <EditIcon fontSize="inherit" />
         </IconButton>
       </AccessControl>
-      <AccessControl requiredPerms={["admin"]}>
+      <AccessControl requiredPerms={["admin", "delete-product-management"]}>
         <IconButton
           onClick={() => handleDeleteProduct(product.id, product.title)}
           color="error"
@@ -279,15 +279,17 @@ const Products = () => {
         <Typography variant="h4" component="h1">
           Products Management
         </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-          onClick={handleOpenAddModal}
-          disabled={isSaving || isDeleting}
-        >
-          Add New Product
-        </Button>
+        <AccessControl requiredPerms={["admin", "create-product-management"]}>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={handleOpenAddModal}
+            disabled={isSaving || isDeleting}
+          >
+            Add New Product
+          </Button>
+        </AccessControl>
       </Box>
 
       {/* DataGrid Table */}

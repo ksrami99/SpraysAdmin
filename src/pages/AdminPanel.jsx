@@ -41,28 +41,60 @@ export default function AdminPanel() {
     <Box sx={{ width: 300 }} role="presentation" onClick={toggleDrawer(false)}>
       <h1 className="text-4xl font-semibold py-5 mx-3">Admin Panel</h1>
       <Divider />
-      <AccessControl requiredPerms={["admin"]}>
+      <AccessControl
+        requiredPerms={[
+          "admin",
+          "read-user-management",
+          "write-user-management",
+          "update-user-management",
+          "delete-user-management",
+        ]}
+      >
         <List className="text-2xl font-semibold">
           <ListItemButton>
             <button onClick={() => setIsOpen("Users")}>Users</button>
           </ListItemButton>
         </List>
       </AccessControl>
-      <AccessControl requiredPerms={["admin"]}>
+      <AccessControl
+        requiredPerms={[
+          "admin",
+          "read-product-management",
+          "write-product-management",
+          "update-product-management",
+          "delete-product-management",
+        ]}
+      >
         <List className="text-2xl font-semibold">
           <ListItemButton>
             <button onClick={() => setIsOpen("Products")}>Products</button>
           </ListItemButton>
         </List>
       </AccessControl>
-      <AccessControl requiredPerms={["admin"]}>
+      <AccessControl
+        requiredPerms={[
+          "admin",
+          "read-categories-management",
+          "write-categories-management",
+          "update-categories-management",
+          "delete-categories-management",
+        ]}
+      >
         <List className="text-2xl font-semibold">
           <ListItemButton>
             <button onClick={() => setIsOpen("Categories")}>Categories</button>
           </ListItemButton>
         </List>
       </AccessControl>
-      <AccessControl requiredPerms={["admin"]}>
+      <AccessControl
+        requiredPerms={[
+          "admin",
+          "read-orders-management",
+          "write-orders-management",
+          "update-orders-management",
+          "delete-orders-management",
+        ]}
+      >
         <List className="text-2xl font-semibold">
           <ListItemButton>
             <button onClick={() => setIsOpen("Orders")}>Orders</button>
@@ -99,9 +131,7 @@ export default function AdminPanel() {
             <Button onClick={logout} color="inherit">
               <Link to={"/"}>Logout</Link>
             </Button>
-          ) : (
-            null
-          )}
+          ) : null}
         </Toolbar>
       </AppBar>
       <div>

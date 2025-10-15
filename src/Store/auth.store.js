@@ -13,7 +13,9 @@ export const useAuthStore = create((set, get) => ({
   ...getInitialState(),
 
   login: (data) => {
-    const { token, user, permissions = [] } = data;
+    const { token, user } = data;
+    const permissions = user?.permissions || [];
+
     set({
       token,
       user,
@@ -35,6 +37,7 @@ export const useAuthStore = create((set, get) => ({
   hasPermission: (requiredPerms) => {
     const { permissions, isAuthenticated } = get();
     if (!isAuthenticated) return false;
+    if (!requiredPerms || requiredPerms.length === 0) return true;
     return requiredPerms.some((p) => permissions.includes(p));
   },
 }));
