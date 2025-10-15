@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import {
   QueryClient,
@@ -22,15 +22,13 @@ const axiosInstance = axios.create({
 const getUsers = async () => (await axiosInstance.get("/user")).data;
 
 // Roles
-const getRoles = async () => (await axiosInstance.get("/rbac/roles")).data;
+// const getRoles = async () => (await axiosInstance.get("/rbac/roles")).data;
 const createRole = async (roleData) =>
   (await axiosInstance.post("/rbac/roles", roleData)).data;
-const deleteRole = async (id) =>
-  (await axiosInstance.delete(`/rbac/roles/${id}`)).data;
 
 // Permissions
-const getPermissions = async () =>
-  (await axiosInstance.get("/rbac/permissions")).data;
+// const getPermissions = async () =>
+// (await axiosInstance.get("/rbac/permissions")).data;
 const createPermission = async (permissionData) =>
   (await axiosInstance.post("/rbac/permissions", permissionData)).data;
 
@@ -46,11 +44,11 @@ const useRbacQueries = () => {
 
   // Queries
   const usersQuery = useQuery({ queryKey: ["users"], queryFn: getUsers });
-  const rolesQuery = useQuery({ queryKey: ["roles"], queryFn: getRoles });
-  const permissionsQuery = useQuery({
-    queryKey: ["permissions"],
-    queryFn: getPermissions,
-  });
+  // const rolesQuery = useQuery({ queryKey: ["roles"], queryFn: getRoles });
+  // const permissionsQuery = useQuery({
+  //   queryKey: ["permissions"],
+  //   queryFn: getPermissions,
+  // });
 
   // Mutations
   const createRoleMutation = useMutation({
@@ -66,8 +64,8 @@ const useRbacQueries = () => {
 
   return {
     usersQuery,
-    rolesQuery,
-    permissionsQuery,
+    // rolesQuery,
+    // permissionsQuery,
     createRoleMutation,
     createPermissionMutation,
     assignRoleMutation,
@@ -97,11 +95,32 @@ const RBACMatrix = () => {
   const [selectedUser, setSelectedUser] = useState("");
   const [matrix, setMatrix] = useState({});
 
+  // const togglePermission = (module, permission) => {
+  //   setMatrix((prev) => {
+  //     const current = prev[module] || {};
+  //     const updated = { ...current, [permission]: !current[permission] };
+
+  //     return { ...prev, [module]: updated };
+  //   });
+  // };
+
   const togglePermission = (module, permission) => {
     setMatrix((prev) => {
       const current = prev[module] || {};
       const updated = { ...current, [permission]: !current[permission] };
-      return { ...prev, [module]: updated };
+
+      // Remove false permissions
+      const cleaned = Object.fromEntries(
+        Object.entries(updated).filter(([_, value]) => value === true)
+      );
+
+      // If module has no true permissions, remove the module entirely
+      if (Object.keys(cleaned).length === 0) {
+        const { [module]: _, ...rest } = prev;
+        return rest;
+      }
+
+      return { ...prev, [module]: cleaned };
     });
   };
 
@@ -112,42 +131,34 @@ const RBACMatrix = () => {
       const selectedPerms = matrix[module];
       if (!selectedPerms) continue;
 
-      const roleSlug = module.toLowerCase().replace(/\s+/g, "-");
+      // Filter only TRUE permissions
+      const truePermissions = Object.entries(selectedPerms)
+        .filter(([_, value]) => value === true)
+        .map(([key]) => key);
 
-      // 1️⃣ Create Role
+      // Skip module if no permissions are selected
+      if (truePermissions.length === 0) continue;
+
+      // 1️⃣ Create Role (backend generates slug automatically)
       const roleRes = await createRoleMutation.mutateAsync({
         role_name: module,
-        description: roleSlug,
       });
       const roleId = roleRes?.data?.id || roleRes?.data?.insertId;
 
-      // 2️⃣ Loop through selected permissions
-      for (const perm of Object.keys(selectedPerms)) {
-        if (!selectedPerms[perm]) continue;
-
-        const permSlug = `${perm.toLowerCase()}-${
-          module.toLowerCase().split(" ")[0]
-        }`;
-
-        // 3️⃣ Create Permission
+      // 2️⃣ Loop through selected permissions (only TRUE ones)
+      for (const perm of truePermissions) {
+        // 3️⃣ Create Permission (backend generates slug automatically)
         const permRes = await createPermissionMutation.mutateAsync({
           permission_name: `${perm} ${module}`,
-          description: permSlug,
         });
         const permissionId = permRes?.data?.id || permRes?.data?.insertId;
 
         // 4️⃣ Grant Permission to Role
-        await grantPermissionMutation.mutateAsync({
-          roleId,
-          permissionId,
-        });
+        await grantPermissionMutation.mutateAsync({ roleId, permissionId });
       }
 
       // 5️⃣ Assign Role to User
-      await assignRoleMutation.mutateAsync({
-        userId: selectedUser,
-        roleId,
-      });
+      await assignRoleMutation.mutateAsync({ userId: selectedUser, roleId });
     }
 
     alert("✅ RBAC Matrix updated successfully!");
@@ -170,9 +181,14 @@ const RBACMatrix = () => {
           ) : (
             <select
               value={selectedUser}
-              onChange={(e) => setSelectedUser(e.target.value)}
+              onChange={(e) => {
+                console.log(e.target.value);
+
+                setSelectedUser(e.target.value);
+              }}
               className="border p-2 rounded w-full"
             >
+              {console.log(matrix, "====== ")}
               <option value="">-- Select a user --</option>
               {usersQuery.data?.data?.map((user) => (
                 <option key={user.id} value={user.id}>
@@ -203,11 +219,16 @@ const RBACMatrix = () => {
                 <td className="text-center p-2">
                   <input
                     type="checkbox"
-                    checked={Object.values(matrix[module] || {}).every(Boolean)}
+                    checked={
+                      matrix[module] &&
+                      Object.keys(matrix[module]).length > 0 &&
+                      Object.values(matrix[module]).every(Boolean)
+                    }
                     onChange={() => {
-                      const allChecked = Object.values(
-                        matrix[module] || {}
-                      ).every(Boolean);
+                      const modulePerms = matrix[module] || {};
+                      const allChecked =
+                        Object.keys(modulePerms).length > 0 &&
+                        Object.values(modulePerms).every(Boolean);
                       const newPerms = PERMISSIONS.reduce(
                         (acc, p) => ({ ...acc, [p]: !allChecked }),
                         {}
