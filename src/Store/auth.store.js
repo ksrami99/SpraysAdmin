@@ -35,6 +35,6 @@ export const useAuthStore = create((set, get) => ({
   hasPermission: (requiredPerms) => {
     const { permissions, isAuthenticated } = get();
     if (!isAuthenticated) return false;
-    return requiredPerms.every((p) => permissions.includes(p));
+    return requiredPerms.some((p) => permissions.includes(p));
   },
 }));
