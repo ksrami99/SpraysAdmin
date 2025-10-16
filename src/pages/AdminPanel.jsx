@@ -27,7 +27,7 @@ export default function AdminPanel() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(true);
 
-  const [isOpen, setIsOpen] = useState("Users");
+  const [isOpen, setIsOpen] = useState("");
 
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
@@ -135,6 +135,7 @@ export default function AdminPanel() {
         </Toolbar>
       </AppBar>
       <div>
+        {isOpen === "" && null}
         {isOpen === "Users" && <Users />}
         {isOpen === "Categories" && <Categories />}
         {isOpen === "Products" && <Products />}
